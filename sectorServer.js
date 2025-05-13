@@ -1,19 +1,20 @@
-const express   = require("express");
-const path      = require("path");
-const readline  = require("readline");
-const { MongoClient } = require("mongodb");
-const axios     = require("axios");
-require("dotenv").config({ path: "./credentialsDontPost/.env" });
+const express = require("express");
+const path = require("path");
+const readline = require("readline");
+const axios = require("axios");
+require("dotenv").config({ path: path.resolve(__dirname, "credentialsDontPost/.env") });
+const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const app = express();
-const PORT = process.argv[2] || process.env.PORT || 4000;
 app.use(express.urlencoded({ extended: true }));
+const PORT = process.argv[2] || 3000;
 
-// MongoDB Setup
-const uri = `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASSWORD}@cluster0.9ho2uur.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(uri);
-const dbName        = process.env.MONGO_DB_NAME;
-const collectionName = process.env.MONGO_COLLECTION;
+const client = new MongoClient(process.env.MONGO_CONNECTION_STRING, {
+  serverApi: ServerApiVersion.v1,
+});
+
+const dbName = "CMSC335DB";
+const collectionName = "stockapp";
 
 // --- ROUTES ---
 
