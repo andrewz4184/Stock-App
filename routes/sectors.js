@@ -1,12 +1,10 @@
 // routes/sectors.js
 const express = require('express');
-const axios   = require('axios');
-const FavoriteSector = require('../models/FavoriteSector');
-
+const axios = require('axios');
 const router = express.Router();
 const ALPHA_URL = 'https://www.alphavantage.co/query';
 
-// GET all sector perf (real-time)
+// GET all sector performance (real-time)
 router.get('/', async (req, res) => {
   try {
     const resp = await axios.get(ALPHA_URL, {
@@ -16,7 +14,6 @@ router.get('/', async (req, res) => {
       }
     });
 
-    // Alpha returns multiple "Rank X: ..." objects; we pick real-time
     const raw = resp.data['Rank A: Real-Time Performance'];
     if (!raw) {
       return res.status(502).json({
@@ -25,7 +22,6 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // Transform into [{ name, performance }]
     const data = Object.entries(raw).map(([name, pct]) => ({
       name,
       performance: parseFloat(pct.replace('%', ''))
@@ -38,37 +34,45 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET favorites
+// GET favorite sectors
 router.get('/favorites', async (req, res) => {
   try {
-    const favs = await FavoriteSector.find().sort('name');
+    const collection = req.app.locals.favorites;
+    const favs = await collection.find({}).sort({ name: 1 }).toArray();
     res.json(favs);
   } catch (err) {
+    console.error('❌ GET /api/sectors/favorites failed:', err.message);
     res.status(500).json({ error: 'Failed to load favorites' });
   }
 });
 
-// POST add favorite
+// POST add a sector to favorites
 router.post('/favorites', async (req, res) => {
   const { name } = req.body;
   try {
-    const exists = await FavoriteSector.findOne({ name });
-    if (!exists) {
-      const fav = await new FavoriteSector({ name }).save();
-      return res.status(201).json(fav);
+    const collection = req.app.locals.favorites;
+    const exists = await collection.findOne({ name });
+    if (exists) {
+      return res.json(exists);
     }
-    res.json(exists);
+    const result = await collection.insertOne({ name });
+    const newFav = { _id: result.insertedId, name };
+    res.status(201).json(newFav);
   } catch (err) {
+    console.error('❌ POST /api/sectors/favorites failed:', err.message);
     res.status(500).json({ error: 'Failed to add favorite' });
   }
 });
 
-// DELETE remove favorite
+// DELETE remove favorite sector
 router.delete('/favorites/:name', async (req, res) => {
+  const { name } = req.params;
   try {
-    await FavoriteSector.deleteOne({ name: req.params.name });
+    const collection = req.app.locals.favorites;
+    await collection.deleteOne({ name });
     res.json({ success: true });
   } catch (err) {
+    console.error('❌ DELETE /api/sectors/favorites/:name failed:', err.message);
     res.status(500).json({ error: 'Failed to remove favorite' });
   }
 });
