@@ -1,0 +1,16 @@
+{
+    "name": "sectorProject",
+    "version": "1.0.0",
+    "description": "Sector Favorites Dashboard modeled on Summer Camp project",
+    "main": "sectorServer.js",
+    "type": "commonjs",
+    "scripts": {
+      "start": "node sectorServer.js"
+    },
+    "dependencies": {
+      "axios": "^1.4.0",
+      "dotenv": "^16.5.0",
+      "express": "^5.1.0",
+      "mongodb": "^6.16.0"
+    }
+}
