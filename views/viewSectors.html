@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sectors</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h2>All Sectors</h2>
+    <table border="1">
+        <tr><th>Sector</th><th>Performance</th></tr>
+        <!-- Data will be inserted here -->
+        {{#each sectors}}
+        <tr>
+            <td>{{name}}</td>
+            <td>{{performance}}</td>
+        </tr>
+        {{/each}}
+    </table>
+    <br />
+    <a href="/" class="button-link">HOME</a>
+</body>
+</html>
