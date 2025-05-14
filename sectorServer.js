@@ -7,6 +7,8 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
+
 const PORT = process.argv[2] || 3000;
 
 const client = new MongoClient(process.env.MONGO_CONNECTION_STRING, {
@@ -30,19 +32,34 @@ app.get("/apply", (req, res) => {
 
 // Process adding a favorite
 app.post("/processFavorite", async (req, res) => {
-  const { sector } = req.body;
+  const { name, email, sector } = req.body;
   const ts = new Date().toString();
   try {
     await client.connect();
     const db = client.db(dbName);
     const col = db.collection(collectionName);
-    await col.insertOne({ name: sector, addedAt: ts });
+    await col.insertOne({ name, email, sector, addedAt: ts });
 
     res.send(`
-      <h2>Favorited Sector</h2>
-      <p><strong>Sector:</strong> ${sector}</p>
-      <p><strong>Added At:</strong> ${ts}</p>
-      <br /><a href="/">HOME</a>
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Favorited Sector</title>
+          <link rel="stylesheet" href="/style.css">
+        </head>
+        <body>
+          <h2>Favorited Sector</h2>
+          <div class="content-container">
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Sector:</strong> ${sector}</p>
+            <p><strong>Added At:</strong> ${ts}</p>
+          </div>
+          <div class="home-button-container">
+            <a href="/" class="button-link">HOME</a>
+          </div>
+        </body>
+      </html>
     `);
   } catch (err) {
     console.error(err);
@@ -86,29 +103,62 @@ app.post("/processReviewFavorite", async (req, res) => {
   }
 });
 
-// List all sectors (API-driven)
-app.get("/listSectors", async (req, res) => {
+// List all sectors
+app.get("/viewSectors", async (req, res) => {
   try {
-    const resp = await axios.get("https://www.alphavantage.co/query", {
-      params: { function: 'SECTOR', apikey: process.env.ALPHA_API_KEY }
-    });
-    const raw = resp.data['Rank A: Real-Time Performance'] || {};
-    let rows = Object.entries(raw)
-      .map(([name, pct]) => `<tr><td>${name}</td><td>${pct}</td></tr>`)
-      .join('') || '<tr><td colspan="2">No data</td></tr>';
+    await client.connect();
+    const db = client.db(dbName);
+    const col = db.collection(collectionName);
+    const sectors = await col.find({}, { projection: { name: 1, email: 1, sector: 1 } }).toArray();
+
+    if (sectors.length === 0) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Sectors</title>
+          <link rel="stylesheet" href="/style.css">
+        </head>
+        <body>
+          <h2>All Sectors</h2>
+          <p>No sectors found in the database.</p>
+          <div class="home-button-container">
+            <a href="/" class="button-link">HOME</a>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+
+    const rows = sectors.map(s =>
+      `<tr><td>${s.name}</td><td>${s.email}</td><td>${s.sector}</td></tr>`
+    ).join('');
+
     res.send(`
-      <h2>All Sectors (Real-Time)</h2>
-      <table border="1">
-        <tr><th>Sector</th><th>Performance</th></tr>
-        ${rows}
-      </table>
-      <br /><a href="/">HOME</a>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Sectors</title>
+        <link rel="stylesheet" href="/style.css">
+      </head>
+      <body>
+        <h2>All Sectors</h2>
+        <table border="1">
+          <tr><th>Name</th><th>Email</th><th>Sector</th></tr>
+          ${rows}
+        </table>
+        <div class="home-button-container">
+          <a href="/" class="button-link">HOME</a>
+        </div>
+      </body>
+      </html>
     `);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error listing sectors.");
+    res.status(500).send("Error fetching sectors.");
   }
 });
+
 
 // Remove all favorites confirmation
 app.get("/adminRemove", (req, res) => {
@@ -122,10 +172,24 @@ app.post("/processAdminRemove", async (req, res) => {
     const db = client.db(dbName);
     const col = db.collection(collectionName);
     const result = await col.deleteMany({});
+
     res.send(`
-      <h2>Removed Favorites</h2>
-      <p>Deleted ${result.deletedCount} favorite(s).</p>
-      <br /><a href="/">HOME</a>
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Removed Favorites</title>
+          <link rel="stylesheet" href="/style.css">
+        </head>
+        <body>
+          <h2>Removed Favorites</h2>
+          <div class="content-container">
+            <p>Deleted ${result.deletedCount} favorite(s).</p>
+          </div>
+          <div class="home-button-container">
+            <a href="/" class="button-link">HOME</a>
+          </div>
+        </body>
+      </html>
     `);
   } catch (err) {
     console.error(err);
