@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><title>Your Favorite Stocks</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+  <h2>Favorite Stocks for <%= email %></h2>
+  <% if (stocks.length === 0) { %>
+    <p>No stocks found.</p>
+  <% } else { %>
+    <table border="1">
+      <tr><th>Stock Symbol</th><th>Date Added</th></tr>
+      <% stocks.forEach(stock => { %>
+        <tr>
+          <td><%= stock.stock %></td>
+          <td><%= new Date(stock.createdAt).toLocaleString() %></td>
+        </tr>
+      <% }) %>
+    </table>
+  <% } %>
+  <br>
+  <a href="/" class="button-link">HOME</a>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Add Favorite Stock</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <h2>Add Favorite Stock</h2>
+    <form action="/processFavorite" method="POST">
+      <label for="name">Name:</label><br />
+      <input type="text" id="name" name="name" required><br />
+
+      <label for="email">Email:</label><br />
+      <input type="email" id="email" name="email" required><br />
+
+      <label for="stock">Stock Symbol:</label><br />
+      <input type="text" id="stock" name="stock" required placeholder="e.g., AAPL"><br />
+
+      <button type="submit">Add Favorite</button>
+    </form>
+    <br />
+    <a href="/">HOME</a>
+  </body>
+</html>
