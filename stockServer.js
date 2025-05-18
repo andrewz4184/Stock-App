@@ -201,7 +201,9 @@ app.post("/processReviewFavoriteStocks", async (req, res) => {
           </tbody>
         </table>
         <br>
-        <a href="/" class="button-link">HOME</a>
+        <div class="home-button-container">
+            <a href="/" class="button-link">HOME</a>
+        </div>
       </body>
       </html>
     `);
@@ -320,12 +322,12 @@ app.get("/remove", (req, res) => {
 
 // Process removal of a specific favorite stock for a specific email
 app.post("/remove", async (req, res) => {
-  const { email, stock } = req.body;
+  const { email, stock, removeAll } = req.body;
 
-  if (!email || !stock) {
+  if (!email) {
     return res.status(400).send(`
       <h2>Error</h2>
-      <p>Both email and stock symbol are required to remove a favorite stock.</p>
+      <p>Email is required.</p>
       <a href="/remove">Try Again</a>
     `);
   }
@@ -334,44 +336,39 @@ app.post("/remove", async (req, res) => {
     await client.connect();
     const db = client.db(dbName);
     const col = db.collection(favoritesCollection);
+    let result;
 
-    const result = await col.deleteMany({ 
-      email: email.toLowerCase(), 
-      stock: stock.toUpperCase()
-    });
-
-    if (result.deletedCount === 0) {
+    if (removeAll === "yes") {
+      result = await col.deleteMany({ email: email.toLowerCase() });
+    } else if (stock) {
+      result = await col.deleteMany({
+        email: email.toLowerCase(),
+        stock: stock.toUpperCase()
+      });
+    } else {
       return res.send(`
-        <h2>Not Found</h2>
-        <p>No favorite stock <strong>${stock.toUpperCase()}</strong> found for email <strong>${email}</strong>.</p>
+        <h2>Error</h2>
+        <p>Please enter a stock symbol or check "Remove all".</p>
         <a href="/remove">Try Again</a>
       `);
     }
 
     res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Removed Favorite Stock</title>
-          <link rel="stylesheet" href="/style.css">
-        </head>
-        <body>
-          <h2>Removed Favorite Stock</h2>
-          <p>Deleted favorite stock <strong>${stock.toUpperCase()}</strong> for email: <strong>${email}</strong>.</p>
-          <br>
-          <a href="/" class="button-link">HOME</a>
-        </body>
-      </html>
+      <h2>Removed Favorite Stock${removeAll === "yes" ? "s" : ""}</h2>
+      <p>Deleted <strong>${result.deletedCount}</strong> entr${result.deletedCount === 1 ? "y" : "ies"} for email: <strong>${email}</strong>.</p>
+      <br>
+      <a href="/" class="button-link">HOME</a>
     `);
   } catch (err) {
     console.error(err);
     res.status(500).send(`
-      <h2>Error removing favorite stock</h2>
-      <p>Something went wrong. Please try again later.</p>
+      <h2>Error</h2>
+      <p>Something went wrong.</p>
       <a href="/remove">Try Again</a>
     `);
   }
 });
+
 
 // --- Start Server ---
 app.listen(PORT, () => {

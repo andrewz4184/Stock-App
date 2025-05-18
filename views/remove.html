@@ -10,10 +10,14 @@
       <label for="email">Enter your email:</label><br />
       <input type="email" id="email" name="email" required placeholder="your.email@example.com" /><br /><br />
 
-      <label for="stock">Enter the stock symbol to remove:</label><br />
-      <input type="text" id="stock" name="stock" required placeholder="AAPL" /><br /><br />
+      <label for="stock">Enter the stock symbol to remove (optional if removing all):</label><br />
+      <input type="text" id="stock" name="stock" placeholder="e.g., AAPL" /><br />
 
-      <button type="submit">Remove This Stock</button>
+      <label for="removeAll">
+      <input type="checkbox" id="removeAll" name="removeAll" value="yes">
+        Remove all favorite stocks for this email
+      </label><br /><br />
+      <button type="submit">Remove</button>
     </form>
     <br />
     <div class="home-button-container">
