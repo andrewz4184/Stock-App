@@ -301,7 +301,9 @@ app.get('/viewStocks', async (req, res) => {
           ${rows}
         </table>`}
         <br>
-        <a href="/" class="button-link">HOME</a>
+        <div class="home-button-container">
+            <a href="/" class="button-link">HOME</a>
+        </div>
       </body>
       </html>
     `);
