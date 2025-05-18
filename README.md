@@ -1,5 +1,5 @@
 # Stock-App
-Submitted by: Rose Smith (directory id: superterp)
+Submitted by: Andrew Zhang (Directory ID: azhang04) 
 
 Group Members: Evan Liu (eliu1210) Arya Palan (apalan) Andrew Zhang (azhang04)
 
