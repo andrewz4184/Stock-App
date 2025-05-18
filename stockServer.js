@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require("path");
-const readline = require("readline");
 const axios = require("axios");
 require("dotenv").config({ path: path.resolve(__dirname, "credentialsDontPost/.env") });
 const { MongoClient, ServerApiVersion } = require("mongodb");
@@ -9,7 +8,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-const PORT = process.argv[2] || 3000;
+const PORT = process.env.PORT || 3000;
 
 const client = new MongoClient(process.env.MONGO_CONNECTION_STRING, {
   serverApi: ServerApiVersion.v1,
@@ -26,7 +25,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
-// Add favorite stock form
+// Add favorite stock form 
 app.get("/apply", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "apply.html"));
 });
